@@ -98,7 +98,7 @@ class Refactor(nn.Module):
         candidate_num = candidate_id.size(1)
         candidate_id = candidate_id.view(-1, candidate_id.size(-1))
         input_mask = ~(candidate_id == 0)
-        candidate_emd = self.encoder(candidate_id, attention_mask=input_mask)[0]
+        candidate_emb = self.encoder(candidate_id, attention_mask=input_mask)[0]
 
         # scoring
         doc_emb = F.normalize(doc_emb, dim=2)
@@ -106,8 +106,8 @@ class Refactor(nn.Module):
         summary_score = self.compute_score(doc_emb, summary_emb, weights)
         doc_emb = torch.repeat_interleave(doc_emb, candidate_num, dim=0)
         weights = torch.repeat_interleave(weights, candidate_num, dim=0)
-        candidate_emd = F.normalize(candidate_emd, dim=2)
-        score = self.compute_score(doc_emb, candidate_emd, weights)
+        candidate_emb = F.normalize(candidate_emb, dim=2)
+        score = self.compute_score(doc_emb, candidate_emb, weights)
         score = score.view(batch_size, candidate_num)
         
         return {'score': score, 'summary_score': summary_score}
